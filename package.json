@@ -1,0 +1,23 @@
+{
+  "name": "supermarked",
+  "version": "0.0.0",
+  "description": "Marked with syntax highlighting and ascii-math by default",
+  "main": "index.js",
+  "dependencies": {
+    "ascii-math": "~1.0.0",
+    "highlight.js": "~7.3.0",
+    "marked": "~0.2.6"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ForbesLindesay/supermarked.git"
+  },
+  "author": "",
+  "license": "MIT",
+  "readmeFilename": "README.md",
+  "gitHead": "8dea211482dcb0c5f127f7c05c350f0d939d69a5"
+}
