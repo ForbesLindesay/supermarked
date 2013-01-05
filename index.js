@@ -55,7 +55,7 @@ function supermarked(src, options) {
     result = result.replace(/<pre><code><math/g, '<math').replace(/<\/math><\/code><\/pre>/g, '</math>')
       .replace(/\\\$/g, '__DOLLAR_SIGN__')
       .replace(/\$(.*)\$/g, function (_, equation) {
-        return math(equation.replace(/\\\$/g, '$')).toString();
+        return math(equation.trim().replace(/__DOLLAR_SIGN__/g, '$')).toString();
       })
       .replace(/__DOLLAR_SIGN__/g, '$');
   }
