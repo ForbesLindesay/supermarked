@@ -54,7 +54,7 @@ function supermarked(src, options) {
   if (!options.ignoreMath) {
     result = result.replace(/<pre><code><math/g, '<math').replace(/<\/math><\/code><\/pre>/g, '</math>').replace(/\\\$/g, '__DOLLAR_SIGN__').split('$');
     for (var i = 1; i < result.length; i += 2) {
-      result[i] = math(result[i].trim().replace(/__DOLLAR_SIGN__/g, '$')).toString();
+      result[i] = math(result[i].trim().replace(/__DOLLAR_SIGN__/g, '$').replace(/&quot;/g, '"').replace(/&gt;/g, '>').replace(/&lt;/g, '<')).toString();
     }
     result = result.join('').replace(/__DOLLAR_SIGN__/g, '$');
   }
