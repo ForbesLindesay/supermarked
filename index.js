@@ -3,6 +3,7 @@ var hljs = require('highlight.js');
 var math = require('ascii-math');
 
 var exports = module.exports = supermarked;
+supermarked.parse = supermarked;
 function supermarked(src, options) {
   options = options || {};
   options.gfm = options.gfm !== false;
