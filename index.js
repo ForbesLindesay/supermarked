@@ -1,76 +1,145 @@
-var marked = require('marked');
-var hljs = require('highlight.js');
-var math = require('ascii-math');
+'use strict';
 
-var exports = module.exports = supermarked;
-supermarked.parse = supermarked;
+var marked = require('marked');
+var highlight = require('highlight-codemirror');
+var katex = require('katex');
+
+var defaults = {
+  gfm: true,
+  tables: true,
+  breaks: false,
+  pedantic: false,
+  sanitize: true,
+  smartLists: true,
+  silent: false,
+  highlight: null,
+  langPrefix: 'cm-s-default lang-',
+  smartypants: false,
+  headerPrefix: '',
+  xhtml: false
+};
+
+function renderMathsExpression(expr) {
+  if (expr[0] === '$' && expr[expr.length - 1] === '$') {
+    var displayStyle = false;
+    expr = expr.substr(1, expr.length - 2);
+    if (expr[0] === '$' && expr[expr.length - 1] === '$') {
+      displayStyle = true;
+      expr = '\\displaystyle ' + expr.substr(1, expr.length - 2);
+    }
+    var html = katex.renderToString(expr);
+    if (displayStyle) {
+      html = html.replace(/class=\"katex\"/g, 'class="katex katex-block" style="display: block;"');
+    }
+    return html;
+  } else {
+    return null;
+  }
+}
+
+function renderHref(user, service) {
+  if (service && typeof service === 'string' && service.indexOf(':user:') !== -1) {
+    return service.replace(':user:', user);
+  } else if (service && typeof service === 'function') {
+    return service(user);
+  }
+}
+
+module.exports = supermarked;
 function supermarked(src, options) {
   options = options || {};
-  options.gfm = options.gfm !== false;
-  var aliases = options.aliases || exports.aliases;
-  options.highlight = options.highlight || function (code, lang) {
-    if (lang) {
-      try {
-        return hljs.highlight(aliases[lang.toLowerCase()] || lang.toLowerCase(), code).value;
-      } catch (ex) {} //let marked automatically escape code in a language we don't speak
-    } else {
-      try {
-        if (!options.ignoreMath && /^\$.+\$$/.test(code))
-          var res = math(code.substring(1, code.length - 1))
-          res.setAttribute('style', 'display: block;')
-          return res.toString();
-      } catch (ex) {}
-    }
+  if (options.theme && !options.langPrefix) {
+    options.langPrefix = 'cm-s-' + options.theme + ' lang-';
   }
-  var tokens = marked.lexer(src, options);
-  var result = marked.parser(tokens, options)
-  if (!options.ignoreMentions) {
-    var services = options.services || exports.services;
-    result = result.replace(/([^ ]+): *@([A-Za-z0-9_-]+)/, function (_, service, user) {
+  Object.keys(defaults).forEach(function (key) {
+    if (options[key] === undefined) {
+      options[key] = defaults[key];
+    }
+  });
+
+  var aliases = options.aliases || supermarked.aliases;
+  if (options.highlight !== false && typeof options.highlight !== 'function') {
+    options.highlight = function (code, lang) {
+      if (lang) {
+        try {
+          var mode = aliases[lang.toLowerCase()] || lang.toLowerCase();
+          highlight.loadMode(mode);
+          return highlight(code, mode);
+        } catch (ex) {
+          throw ex;
+        } //let marked automatically escape code in a language we don't speak
+      }
+    };
+  }
+
+  if (options.math !== false) {
+    options.renderer = new marked.Renderer();
+    var originalCode = options.renderer.code.bind(options.renderer);
+    options.renderer.code = function(code, lang, escaped) {
+      var math;
+      if (!lang && (math = renderMathsExpression(code))) {
+        return math;
+      }
+      return originalCode(code, lang, escaped);
+    };
+    var originalCodeSpan = options.renderer.codespan.bind(options.renderer);
+    options.renderer.codespan = function(text) {
+      var math;
+      if (math = renderMathsExpression(text)) {
+        return math;
+      }
+      return originalCodeSpan(text);
+    };
+  }
+
+  var result = marked(src, options);
+
+  if (options.mentions !== false) {
+    var services = options.services || {};
+    Object.keys(supermarked.services).forEach(function (key) {
+      if (services[key] === undefined) {
+        services[key] = supermarked.services[key];
+      }
+    });
+    result = result.replace(/([a-z]+): *@([A-Za-z0-9_-]+)/g, function (_, service, user) {
         service = service.toLowerCase();
-        if (services[service]) {
+        var href;
+        if (href = renderHref(user, services[service])) {
           return '<a href="'
-           + services[service].replace(':user:', user)
+           + href
            + '" class="user-profile user-profile-'
-           + service 
-           + '">@' 
-           + user 
+           + service
+           + '">@'
+           + user
            + '</a>';
         } else {
           return _;
         }
       })
-      .replace(/ @([A-Za-z0-9_-]+)/, function (_, user) {
-        if (services['@']) {
-          return ' <a href="'
-           + services['@'].replace(':user:', user)
-           + '" class="user-profile">@' 
-           + user 
+      .replace(/@([A-Za-z0-9_-]+)(.*)/g, function (_, user, after) {
+        var href;
+        if (!/^\<\/a\>/.test(after) && (href = renderHref(user, services['@']))) {
+          return '<a href="'
+           + href
+           + '" class="user-profile">@'
+           + user
            + '</a>';
         } else {
           return _;
         }
       });;
   }
-  if (!options.ignoreMath) {
-    result = result.replace(/<pre><code><math/g, '<math').replace(/<\/math><\/code><\/pre>/g, '</math>').replace(/\\\$/g, '__DOLLAR_SIGN__').split('$');
-    for (var i = 1; i < result.length; i += 2) {
-      result[i] = math(result[i].trim().replace(/__DOLLAR_SIGN__/g, '$').replace(/&quot;/g, '"').replace(/&gt;/g, '>').replace(/&lt;/g, '<')).toString();
-    }
-    result = result.join('').replace(/__DOLLAR_SIGN__/g, '$');
-  }
+
   return result;
 }
 
-var services = exports.services = {
+var services = supermarked.services = {
   'twitter': 'https://twitter.com/:user:',
   'github': 'https://github.com/:user:',
-  'npm': 'https://npmjs.org/~:user:',
-  'facebook': 'https://www.facebook.com/:user:',
-  'local': '/user/:user:'
+  'npm': 'https://www.npmjs.org/~:user:',
+  'facebook': 'https://www.facebook.com/:user:'
 };
-services['@'] = services.local;//set the default here
 
-var alises = exports.aliases = {
+var alises = supermarked.aliases = {
   'js': 'javascript'
 };
