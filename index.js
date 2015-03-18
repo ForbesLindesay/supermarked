@@ -3,6 +3,7 @@
 var marked = require('marked');
 var highlight = require('highlight-codemirror');
 var katex = require('katex');
+var entities = require("entities");
 
 var defaults = {
   gfm: true,
@@ -27,10 +28,7 @@ function renderMathsExpression(expr) {
       displayStyle = true;
       expr = '\\displaystyle ' + expr.substr(1, expr.length - 2);
     }
-    var html = katex.renderToString(expr);
-    if (displayStyle) {
-      html = html.replace(/class=\"katex\"/g, 'class="katex katex-block" style="display: block;"');
-    }
+    var html = katex.renderToString(entities.decodeHTML(expr), displayStyle);
     return html;
   } else {
     return null;
