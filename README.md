@@ -7,7 +7,7 @@ Marked with useful extensions:
  - Mentions (just like in a GitHub issue)
 
 [![Build Status](https://img.shields.io/travis/ForbesLindesay/supermarked/master.svg)](https://travis-ci.org/ForbesLindesay/supermarked)
-[![Dependency Status](https://img.shields.io/gemnasium/ForbesLindesay/supermarked.svg)](https://gemnasium.com/ForbesLindesay/supermarked)
+[![Dependency Status](https://img.shields.io/david/ForbesLindesay/supermarked.svg)](https://david-dm.org/ForbesLindesay/supermarked)
 [![NPM version](https://img.shields.io/npm/v/supermarked.svg)](https://www.npmjs.org/package/supermarked)
 
 ## API
