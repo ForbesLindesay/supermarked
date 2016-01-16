@@ -1,12 +1,12 @@
 {
   "name": "supermarked",
   "version": "2.0.0",
-  "description": "Marked with syntax highlighting and ascii-math by default",
+  "description": "Marked with ascii-math by default",
   "main": "index.js",
   "dependencies": {
-    "highlight-codemirror": "^4.6.1",
-    "katex": "^0.1.1",
-    "marked": "~0.3.2"
+    "katex": "^0.2.0",
+    "marked": "^0.3.3",
+    "entities": "^1.1.1"
   },
   "devDependencies": {},
   "scripts": {

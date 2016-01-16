@@ -1,8 +1,8 @@
 'use strict';
 
 var marked = require('marked');
-var highlight = require('highlight-codemirror');
 var katex = require('katex');
+var entities = require("entities");
 
 var defaults = {
   gfm: true,
@@ -12,7 +12,6 @@ var defaults = {
   sanitize: true,
   smartLists: true,
   silent: false,
-  highlight: null,
   langPrefix: 'cm-s-default lang-',
   smartypants: false,
   headerPrefix: '',
@@ -27,10 +26,7 @@ function renderMathsExpression(expr) {
       displayStyle = true;
       expr = '\\displaystyle ' + expr.substr(1, expr.length - 2);
     }
-    var html = katex.renderToString(expr);
-    if (displayStyle) {
-      html = html.replace(/class=\"katex\"/g, 'class="katex katex-block" style="display: block;"');
-    }
+    var html = katex.renderToString(entities.decodeHTML(expr), displayStyle);
     return html;
   } else {
     return null;
@@ -56,21 +52,6 @@ function supermarked(src, options) {
       options[key] = defaults[key];
     }
   });
-
-  var aliases = options.aliases || supermarked.aliases;
-  if (options.highlight !== false && typeof options.highlight !== 'function') {
-    options.highlight = function (code, lang) {
-      if (lang) {
-        try {
-          var mode = aliases[lang.toLowerCase()] || lang.toLowerCase();
-          highlight.loadMode(mode);
-          return highlight(code, mode);
-        } catch (ex) {
-          throw ex;
-        } //let marked automatically escape code in a language we don't speak
-      }
-    };
-  }
 
   if (options.math !== false) {
     options.renderer = new marked.Renderer();
@@ -138,8 +119,4 @@ var services = supermarked.services = {
   'github': 'https://github.com/:user:',
   'npm': 'https://www.npmjs.org/~:user:',
   'facebook': 'https://www.facebook.com/:user:'
-};
-
-var alises = supermarked.aliases = {
-  'js': 'javascript'
 };
