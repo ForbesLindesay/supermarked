@@ -5,7 +5,7 @@
   "main": "index.js",
   "dependencies": {
     "highlight-codemirror": "^4.6.1",
-    "katex": "^0.1.1",
+    "katex": "^0.7.1",
     "marked": "~0.3.2"
   },
   "devDependencies": {},
