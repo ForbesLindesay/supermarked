@@ -1,5 +1,7 @@
 # supermarked
 
+[![Greenkeeper badge](https://badges.greenkeeper.io/ForbesLindesay/supermarked.svg)](https://greenkeeper.io/)
+
 Marked with useful extensions:
 
  - Syntax highlighting (via CodeMirror)
