@@ -46,6 +46,7 @@ function renderHref(user, service) {
 }
 
 module.exports = supermarked;
+supermarked.parse = supermarked; // for ForbesLindesay/transformers
 function supermarked(src, options) {
   options = options || {};
   if (options.theme && !options.langPrefix) {
@@ -141,5 +142,6 @@ var services = supermarked.services = {
 };
 
 var alises = supermarked.aliases = {
+  'html': 'htmlmixed',
   'js': 'javascript'
 };
